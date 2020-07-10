@@ -1,7 +1,7 @@
 import requests
 import getpass
 import json
-
+from optparse import OptionParser
 
 #####  Init
 def parse_args():
@@ -19,7 +19,7 @@ def get_creds(options):
         session.auth = (admin_user, admin_password)
     else: # token auth
         token = input("Please enter your auth token.\n")
-        session.headers = {'Authorization': "Basic " + token}
+        session.headers = {'Authorization': "Bearer " + token}
     return base_url, session
 
 
@@ -30,7 +30,7 @@ def projects(base_url, session, paged_start=None, paged_limit=None):
         try:
             r = session.get(f"{base_url}/rest/api/1.0/projects/", params=params)
         except requests.exceptions.SSLError:
-            r = session.get(f"{base_url}/rest/api/1.0/projects/", params=params verify=False)
+            r = session.get(f"{base_url}/rest/api/1.0/projects/", params=params, verify=False)
 
         r_data = r.json()
         for project_json in r_data['values']:
@@ -45,7 +45,7 @@ def repos(base_url, session, project, paged_start=None, paged_limit=None):
         try:
             r = session.get(f"{base_url}/rest/api/1.0/projects/{project['key']}/repos/", params=params)
         except requests.exceptions.SSLError:
-            r = session.get(f"{base_url}/rest/api/1.0/projects/{project['key']}/repos/", params=params verify=False)
+            r = session.get(f"{base_url}/rest/api/1.0/projects/{project['key']}/repos/", params=params, verify=False)
 
         r_data = r.json()
         for project_json in r_data['values']:
@@ -63,10 +63,12 @@ def main():
         # Action on projects
         # print(project['key'])
         # print(project)
+        print(f"Project Key: {project['key']}")
         for repo in repos(base_url, session, project):
             # Action on repos
             # print(repo['slug'])
             # print(repo)
+            print(f"Repo Slug: {repo['slug']}")
 
 
 if __name__ == '__main__':
